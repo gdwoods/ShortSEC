@@ -93,6 +93,9 @@ export default function AlertDetailModal({ alert, isOpen, onClose }: AlertDetail
         <div className="sticky top-0 bg-gray-800 border-b border-gray-700 p-6 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">{alert.ticker}</h2>
+            {alert.company_name && (
+              <p className="text-gray-400 text-sm mt-0.5">{alert.company_name}</p>
+            )}
             <p className="text-gray-400 text-sm mt-1">
               <FormTypeTooltip formType={alert.form_type}>
                 <span className="cursor-help underline decoration-dotted decoration-gray-500 hover:text-gray-300">

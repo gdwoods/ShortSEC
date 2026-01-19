@@ -51,9 +51,39 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Fetch company names from company_universe table
+    const uniqueTickers = [...new Set((data || []).map((a: any) => a.ticker).filter(Boolean))];
+    const companyNamesMap: Record<string, string> = {};
+    
+    if (uniqueTickers.length > 0) {
+      try {
+        const { data: companyData, error: companyError } = await supabase
+          .from('company_universe')
+          .select('ticker, title')
+          .in('ticker', uniqueTickers);
+        
+        if (!companyError && companyData) {
+          companyData.forEach((company: any) => {
+            if (company.ticker && company.title) {
+              companyNamesMap[company.ticker.toUpperCase()] = company.title;
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching company names:', err);
+        // Continue without company names if fetch fails
+      }
+    }
+
+    // Add company names to alerts
+    const alertsWithCompanyNames = (data || []).map((item: any) => ({
+      ...item,
+      company_name: companyNamesMap[item.ticker?.toUpperCase()] || null,
+    }));
+
     // Sort by date first (primary), then by filing_datetime if available (secondary)
     // This ensures filings with same date are ordered by time, but don't penalize filings without datetime
-    const sortedData = (data || []).sort((a, b) => {
+    const sortedData = alertsWithCompanyNames.sort((a, b) => {
       // Primary sort: by date (newest first)
       const aDate = a.date ? new Date(a.date + 'T00:00:00').getTime() : 0; // Use date as primary
       const bDate = b.date ? new Date(b.date + 'T00:00:00').getTime() : 0;

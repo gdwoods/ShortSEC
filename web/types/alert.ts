@@ -3,6 +3,7 @@ export interface DilutionAlert {
   date: string;
   filing_datetime?: string | null; // ISO datetime string (includes time)
   ticker: string;
+  company_name?: string | null; // Company name from company_universe table
   form_type: string;
   link_to_filing: string | null;
   warrants_found: boolean;
