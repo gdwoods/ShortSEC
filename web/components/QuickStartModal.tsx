@@ -37,9 +37,13 @@ export default function QuickStartModal({ isOpen, onClose }: QuickStartModalProp
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               What is SEC Dilution Alerts?
             </h3>
-            <p className="text-gray-700 dark:text-gray-300">
+            <p className="text-gray-700 dark:text-gray-300 mb-3">
               This tool automatically monitors SEC filings for dilution events and red flags that short sellers watch for. 
-              It scans S-1, S-3, 424B4, 424B5, and 8-K filings in real-time and alerts you to potential dilution risks.
+              It scans S-1, S-3, 424B4, 424B5, 8-K, 424B3, F-1, F-3, 6-K, and other relevant filings in real-time and alerts you to potential dilution risks.
+            </p>
+            <p className="text-gray-700 dark:text-gray-300">
+              <strong>Key Features:</strong> Real-time alerts, watchlist tracking, company activities page, enhanced data columns (share price, offering type, company names), 
+              improved date formatting, and detailed filing information with red flag detection.
             </p>
           </div>
 
@@ -129,6 +133,50 @@ export default function QuickStartModal({ isOpen, onClose }: QuickStartModalProp
             </ul>
           </div>
 
+          {/* Company Activities */}
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-2 mb-3">
+              <BookOpen className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Company Activities Page</h3>
+            </div>
+            <p className="text-gray-700 dark:text-gray-300 mb-3">
+              Track company activities and notifications from email alerts and other sources:
+            </p>
+            <ul className="space-y-2 text-gray-700 dark:text-gray-300 list-disc list-inside">
+              <li><strong>Access:</strong> Click the Activity icon (📊) in the header navigation</li>
+              <li><strong>View All Activities:</strong> See a comprehensive list of all tracked company activities</li>
+              <li><strong>Filter by Ticker:</strong> Use the filter box to find activities for specific tickers</li>
+              <li><strong>Sortable Columns:</strong> Click any column header to sort by that field</li>
+              <li><strong>Formatted Dates:</strong> Dates and timestamps are automatically formatted for easy reading</li>
+              <li><strong>Text Wrapping:</strong> Long descriptions are truncated with tooltips showing full text</li>
+            </ul>
+          </div>
+
+          {/* Enhanced Alerts Table */}
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Enhanced Alerts Table</h3>
+            </div>
+            <p className="text-gray-700 dark:text-gray-300 mb-3">
+              The alerts table includes several new columns and improvements:
+            </p>
+            <ul className="space-y-2 text-gray-700 dark:text-gray-300 list-disc list-inside">
+              <li><strong>Company Name:</strong> Full company name displayed below each ticker symbol</li>
+              <li><strong>Share Price:</strong> New column showing the offering share price</li>
+              <li><strong>Stock Price:</strong> Shows price at filing time and 7-day follow-up with percentage change</li>
+              <li><strong>Offering Type:</strong> Displays the type of offering (e.g., Private Placement, Underwritten, RDO)</li>
+              <li><strong>Share Equivalent:</strong> Total shares or share equivalent for the offering</li>
+              <li><strong>Improved Date Formatting:</strong> Dates are formatted in a readable format (e.g., "Sep 30, 2025, 11:16 PM")</li>
+              <li><strong>Full Flag Names:</strong> Red flags show full names (Toxic Debt, Resignation, Warrants, Underwriter)</li>
+            </ul>
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                <strong>Tip:</strong> Click any alert row to see detailed information including offering type, bank, investors, and more.
+              </p>
+            </div>
+          </div>
+
           {/* Auto-Refresh */}
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2 mb-3">
@@ -149,9 +197,13 @@ export default function QuickStartModal({ isOpen, onClose }: QuickStartModalProp
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
             <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-300 mb-2">💡 Pro Tips</h3>
             <ul className="space-y-2 text-blue-800 dark:text-blue-200 list-disc list-inside">
-              <li>Click on any alert row to see detailed information about the filing</li>
+              <li>Click on any alert row to see detailed information including offering type, bank, investors, and share equivalent</li>
               <li>Hover over form types to see descriptions of what each filing means</li>
               <li>Use the dark/light mode toggle (moon/sun icon) in the header</li>
+              <li>Visit the Company Activities page (Activity icon) to view all tracked company notifications</li>
+              <li>Company names appear below tickers in the alerts table for quick identification</li>
+              <li>Share Price column shows the actual offering price per share</li>
+              <li>Stock Price column shows price at filing and 7-day follow-up with color-coded percentage changes</li>
               <li>High risk scores don't guarantee dilution, but indicate increased risk</li>
               <li>Monitor tickers with toxic underwriters closely - they often signal dilution</li>
             </ul>
