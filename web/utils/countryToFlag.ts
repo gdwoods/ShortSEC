@@ -50,6 +50,7 @@ export function countryInfo(country?: string | null): CountryInfo {
 
     ISRAEL: "IL",
     CANADA: "CA",
+    AUSTRALIA: "AU",
   };
 
   const code =
