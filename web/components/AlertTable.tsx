@@ -182,7 +182,7 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
           <tr className="border-b border-gray-200 dark:border-gray-700">
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Date</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Ticker</th>
-            <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Flag</th>
+            <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Country</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Form</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Type</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Risk</th>
