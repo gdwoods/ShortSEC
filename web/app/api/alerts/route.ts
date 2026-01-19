@@ -51,39 +51,47 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch company names from company_universe table
+    // Fetch company names and countries from company_universe table
     const uniqueTickers = [...new Set((data || []).map((a: any) => a.ticker).filter(Boolean))];
     const companyNamesMap: Record<string, string> = {};
+    const companyCountriesMap: Record<string, string> = {};
     
     if (uniqueTickers.length > 0) {
       try {
         const { data: companyData, error: companyError } = await supabase
           .from('company_universe')
-          .select('ticker, title')
+          .select('ticker, title, country')
           .in('ticker', uniqueTickers);
         
         if (!companyError && companyData) {
           companyData.forEach((company: any) => {
-            if (company.ticker && company.title) {
-              companyNamesMap[company.ticker.toUpperCase()] = company.title;
+            const tickerUpper = company.ticker?.toUpperCase();
+            if (tickerUpper) {
+              if (company.title) {
+                companyNamesMap[tickerUpper] = company.title;
+              }
+              if (company.country) {
+                companyCountriesMap[tickerUpper] = company.country;
+              }
             }
           });
         }
       } catch (err) {
-        console.error('Error fetching company names:', err);
-        // Continue without company names if fetch fails
+        console.error('Error fetching company info:', err);
+        // Continue without company info if fetch fails
       }
     }
 
-    // Add company names to alerts
-    const alertsWithCompanyNames = (data || []).map((item: any) => ({
+    // Add company names and countries to alerts
+    const alertsWithCompanyInfo = (data || []).map((item: any) => ({
       ...item,
       company_name: companyNamesMap[item.ticker?.toUpperCase()] || null,
+      country: companyCountriesMap[item.ticker?.toUpperCase()] || null,
     }));
 
     // Sort by date first (primary), then by filing_datetime if available (secondary)
     // This ensures filings with same date are ordered by time, but don't penalize filings without datetime
-    const sortedData = alertsWithCompanyNames.sort((a, b) => {
+    const sortedData = alertsWithCompanyInfo.sort((a, b) => {
       // Primary sort: by date (newest first)
       const aDate = a.date ? new Date(a.date + 'T00:00:00').getTime() : 0; // Use date as primary
       const bDate = b.date ? new Date(b.date + 'T00:00:00').getTime() : 0;

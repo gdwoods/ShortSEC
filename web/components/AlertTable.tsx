@@ -6,6 +6,7 @@ import { ExternalLink, Star } from "lucide-react";
 import { hasValidUnderwriter } from "@/lib/alertUtils";
 import FormTypeTooltip from "@/components/FormTypeTooltip";
 import { isTickerWatched, toggleWatchlist } from "@/lib/watchlist";
+import { countryToFlag, countryInfo } from "@/utils/countryToFlag";
 
 interface AlertTableProps {
   alerts: DilutionAlert[];
@@ -166,6 +167,7 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
         <colgroup>
           <col className="w-[70px]" />
           <col className="w-[75px]" />
+          <col className="w-[30px]" />
           <col className="w-[45px]" />
           <col className="w-[70px]" />
           <col className="w-[40px]" />
@@ -180,6 +182,7 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
           <tr className="border-b border-gray-200 dark:border-gray-700">
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Date</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Ticker</th>
+            <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Flag</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Form</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Type</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Risk</th>
@@ -256,6 +259,18 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
                     <Star className={`w-3 h-3 ${watchedTickers.has(alert.ticker.toUpperCase()) ? "fill-current" : ""}`} />
                   </button>
                 </div>
+              </td>
+              <td className="px-1 py-0.5 text-center">
+                {alert.country && countryToFlag(alert.country) ? (
+                  <span 
+                    className="text-base" 
+                    title={`${alert.country}${countryInfo(alert.country).isRisky ? ' (Risky Jurisdiction)' : ''}`}
+                  >
+                    {countryToFlag(alert.country)}
+                  </span>
+                ) : (
+                  <span className="text-gray-400 dark:text-gray-600 text-xs">-</span>
+                )}
               </td>
               <td className="px-1 py-0.5 text-gray-700 dark:text-gray-400">
                 <FormTypeTooltip formType={alert.form_type}>

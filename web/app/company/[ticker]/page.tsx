@@ -7,10 +7,12 @@ import { DilutionAlert } from "@/types/alert";
 import { ArrowLeft, TrendingUp, AlertTriangle, DollarSign, FileText, Calendar } from "lucide-react";
 import AlertTable from "@/components/AlertTable";
 import AlertDetailModal from "@/components/AlertDetailModal";
+import { countryToFlag, countryInfo } from "@/utils/countryToFlag";
 
 interface CompanyStats {
   ticker: string;
   company_name: string | null;
+  country: string | null;
   totalFilings: number;
   avgRiskScore: number;
   maxRiskScore: number;
@@ -166,9 +168,19 @@ export default function CompanyProfilePage() {
 
         {/* Company Header */}
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-            {stats.ticker}
-          </h1>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {stats.ticker}
+            </h1>
+            {stats.country && countryToFlag(stats.country) && (
+              <span 
+                className="text-2xl"
+                title={`${stats.country}${countryInfo(stats.country).isRisky ? ' (Risky Jurisdiction)' : ''}`}
+              >
+                {countryToFlag(stats.country)}
+              </span>
+            )}
+          </div>
           {stats.company_name && (
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
               {stats.company_name}

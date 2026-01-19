@@ -147,6 +147,132 @@ def load_company_universe_from_db(client: Client) -> Optional[pd.DataFrame]:
         return None
 
 
+def _normalize_country_from_address(address: Dict) -> Optional[str]:
+    """Helper function to normalize country from SEC address data."""
+    if not address:
+        return None
+    
+    us_states = {
+        "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID",
+        "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS",
+        "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK",
+        "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV",
+        "WI", "WY", "DC", "PR"
+    }
+    
+    state_or_country = (address.get("stateOrCountry") or "").strip().upper()
+    state_or_country_desc = (address.get("stateOrCountryDescription") or "").strip()
+    
+    if state_or_country in us_states:
+        return "USA"
+    if state_or_country_desc:
+        return state_or_country_desc
+    if state_or_country:
+        return state_or_country
+    return None
+
+
+def ensure_company_in_universe(ticker: str, cik: Optional[str], client: Client) -> None:
+    """
+    Ensure company exists in company_universe table with country info.
+    
+    This function is called automatically when saving alerts to ensure
+    new tickers get their country information populated. For performance,
+    it only fetches country if the company doesn't exist yet.
+    
+    Args:
+        ticker: Stock ticker symbol
+        cik: Company CIK (optional, will be fetched if not provided)
+        client: Supabase client
+    """
+    try:
+        import requests
+        import time
+        
+        ticker_upper = ticker.upper()
+        SEC_DATA_BASE = "https://data.sec.gov"
+        SEC_HEADERS_LOCAL = {
+            "User-Agent": "SEC-EDGAR-Scraper (garthwoods@gmail.com)",
+            "Accept": "application/json",
+        }
+        
+        # Check if company already exists with country
+        response = client.table('company_universe').select('cik, ticker, country').eq('ticker', ticker_upper).execute()
+        
+        if response.data:
+            existing = response.data[0]
+            # If company exists with country, nothing to do
+            if existing.get('country'):
+                return
+            # Company exists but no country - use existing CIK if available
+            if existing.get('cik') and not cik:
+                cik = existing.get('cik')
+            # If still no CIK, try to fetch it (but don't block)
+            if not cik:
+                return  # Backfill script can handle this
+        
+        # Company doesn't exist or has no country - fetch CIK if needed
+        if not cik:
+            try:
+                time.sleep(0.1)
+                tickers_response = requests.get(
+                    f"https://www.sec.gov/files/company_tickers.json",
+                    headers=SEC_HEADERS_LOCAL,
+                    timeout=10
+                )
+                if tickers_response.status_code == 200:
+                    tickers_data = tickers_response.json()
+                    for entry in tickers_data.values():
+                        if entry.get("ticker", "").strip().upper() == ticker_upper:
+                            cik = str(entry.get("cik_str", ""))
+                            break
+            except:
+                pass  # Silently fail to avoid blocking alert saving
+        
+        # Fetch company info if we have CIK
+        company_name = None
+        country = None
+        
+        if cik:
+            try:
+                cik_numeric = str(cik).lstrip("0").zfill(10)
+                time.sleep(0.1)  # Rate limiting
+                submissions_response = requests.get(
+                    f"{SEC_DATA_BASE}/submissions/CIK{cik_numeric}.json",
+                    headers=SEC_HEADERS_LOCAL,
+                    timeout=10
+                )
+                
+                if submissions_response.status_code == 200:
+                    data = submissions_response.json()
+                    company_name = data.get("name", "")
+                    addresses = data.get("addresses", {})
+                    
+                    business_address = addresses.get("business")
+                    mailing_address = addresses.get("mailing")
+                    
+                    if business_address:
+                        country = _normalize_country_from_address(business_address)
+                    if not country and mailing_address:
+                        country = _normalize_country_from_address(mailing_address)
+            except:
+                pass  # Silently fail to avoid blocking alert saving
+        
+        # Save to company_universe
+        record = {
+            "cik": cik,
+            "ticker": ticker_upper,
+            "title": company_name,
+            "country": country,
+        }
+        
+        client.table('company_universe').upsert([record], on_conflict='cik').execute()
+        
+    except Exception as e:
+        # Don't fail alert saving if company info fetch fails
+        print(f"[Supabase] Warning: Could not ensure company info for {ticker}: {e}")
+
+
 def save_alerts_to_db(filings: List[Dict], client: Client, table_name: str = "sec_filing_alerts") -> bool:
     """
     Saves dilution alert results to Supabase database.
@@ -168,11 +294,21 @@ def save_alerts_to_db(filings: List[Dict], client: Client, table_name: str = "se
     try:
         rows = []
         
+        # Track unique tickers to ensure company info
+        seen_tickers = set()
+        
         for filing in filings:
             # Skip filings with UNKNOWN ticker
             ticker = filing.get("ticker", "UNKNOWN")
             if not ticker or ticker.upper() == "UNKNOWN":
                 continue
+            
+            # Ensure company info exists in company_universe (only once per ticker)
+            ticker_upper = ticker.upper()
+            if ticker_upper not in seen_tickers:
+                cik = filing.get("cik")
+                ensure_company_in_universe(ticker_upper, cik, client)
+                seen_tickers.add(ticker_upper)
             
             # Extract date and datetime
             date_str = filing.get("pubDate") or filing.get("date") or filing.get("filing_date", "")
