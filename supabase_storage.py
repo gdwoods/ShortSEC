@@ -199,19 +199,19 @@ def ensure_company_in_universe(ticker: str, cik: Optional[str], client: Client) 
         # Check if company already exists with country
         response = client.table('company_universe').select('cik, ticker, country').eq('ticker', ticker_upper).execute()
         
+        company_exists = False
         if response.data:
             existing = response.data[0]
+            company_exists = True
             # If company exists with country, nothing to do
             if existing.get('country'):
                 return
             # Company exists but no country - use existing CIK if available
             if existing.get('cik') and not cik:
                 cik = existing.get('cik')
-            # If still no CIK, try to fetch it (but don't block)
-            if not cik:
-                return  # Backfill script can handle this
+            # Note: Continue to fetch CIK if missing, and then fetch country
         
-        # Company doesn't exist or has no country - fetch CIK if needed
+        # Fetch CIK if needed (whether company exists or not)
         if not cik:
             try:
                 time.sleep(0.1)
@@ -266,7 +266,16 @@ def ensure_company_in_universe(ticker: str, cik: Optional[str], client: Client) 
             "country": country,
         }
         
-        client.table('company_universe').upsert([record], on_conflict='cik').execute()
+        # Use ticker as conflict key if CIK is missing (for companies that exist without CIK)
+        if cik:
+            client.table('company_universe').upsert([record], on_conflict='cik').execute()
+        else:
+            # If no CIK, update by ticker instead
+            if company_exists:
+                client.table('company_universe').update(record).eq('ticker', ticker_upper).execute()
+            else:
+                # Insert new record (without CIK)
+                client.table('company_universe').insert(record).execute()
         
     except Exception as e:
         # Don't fail alert saving if company info fetch fails
