@@ -177,20 +177,27 @@ export default function QuickStartModal({ isOpen, onClose }: QuickStartModalProp
             </div>
           </div>
 
-          {/* Auto-Refresh */}
+          {/* Real-Time Updates */}
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2 mb-3">
               <Search className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Auto-Refresh</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Real-Time Updates</h3>
             </div>
             <p className="text-gray-700 dark:text-gray-300 mb-2">
-              The page automatically refreshes every ~15 seconds to check for new filings. You can:
+              The page uses real-time connections to instantly detect new filings as they're added to the database:
             </p>
             <ul className="space-y-2 text-gray-700 dark:text-gray-300 list-disc list-inside">
-              <li><strong>Pause/Resume:</strong> Click the pause/play button in the polling status box</li>
+              <li><strong>Real-Time Active:</strong> New filings appear instantly when detected (no refresh needed)</li>
+              <li><strong>Pause/Resume:</strong> Click the pause/play button to temporarily disable updates</li>
               <li><strong>Sound Alerts:</strong> Enable audible alerts when new filings are detected (bell icon in header)</li>
-              <li><strong>Countdown Timer:</strong> See when the next refresh will occur</li>
+              <li><strong>Automatic Fallback:</strong> If real-time is unavailable, the system automatically falls back to polling every ~15 seconds</li>
+              <li><strong>Status Indicator:</strong> Check the status box to see if real-time is active or using polling</li>
             </ul>
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                <strong>Note:</strong> Real-time updates are instant, so you'll see new filings appear automatically without waiting for page refreshes.
+              </p>
+            </div>
           </div>
 
           {/* Tips */}
