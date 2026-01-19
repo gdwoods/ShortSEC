@@ -72,9 +72,15 @@ export async function GET(request: NextRequest) {
               }
               if (company.country) {
                 companyCountriesMap[tickerUpper] = company.country;
+                // Debug: Log IBG specifically
+                if (tickerUpper === 'IBG') {
+                  console.log(`[API] IBG country found: "${company.country}"`);
+                }
               }
             }
           });
+        } else if (companyError) {
+          console.error('[API] Error fetching company info:', companyError);
         }
       } catch (err) {
         console.error('Error fetching company info:', err);
@@ -83,11 +89,21 @@ export async function GET(request: NextRequest) {
     }
 
     // Add company names and countries to alerts
-    const alertsWithCompanyInfo = (data || []).map((item: any) => ({
-      ...item,
-      company_name: companyNamesMap[item.ticker?.toUpperCase()] || null,
-      country: companyCountriesMap[item.ticker?.toUpperCase()] || null,
-    }));
+    const alertsWithCompanyInfo = (data || []).map((item: any) => {
+      const tickerUpper = item.ticker?.toUpperCase();
+      const country = companyCountriesMap[tickerUpper] || null;
+      
+      // Debug: Log IBG specifically
+      if (tickerUpper === 'IBG') {
+        console.log(`[API] IBG alert - country from map: "${country}", ticker: "${tickerUpper}"`);
+      }
+      
+      return {
+        ...item,
+        company_name: companyNamesMap[tickerUpper] || null,
+        country: country,
+      };
+    });
 
     // Sort by date first (primary), then by filing_datetime if available (secondary)
     // This ensures filings with same date are ordered by time, but don't penalize filings without datetime

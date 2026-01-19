@@ -334,6 +334,15 @@ export default function Home() {
       
       // Debug logging - client side
       console.log(`[Client] Fetched ${newAlerts.length} alerts from API`);
+      
+      // Debug: Check IBG alerts specifically
+      const ibgAlerts = newAlerts.filter(a => a.ticker?.toUpperCase() === 'IBG');
+      if (ibgAlerts.length > 0) {
+        console.log(`[Client] IBG alerts found: ${ibgAlerts.length}`);
+        ibgAlerts.forEach(alert => {
+          console.log(`[Client] IBG alert - country: "${alert.country}", ticker: "${alert.ticker}"`);
+        });
+      }
       if (newAlerts.length > 0) {
         const dates = newAlerts.map(a => a.date).filter(Boolean);
         const uniqueDates = [...new Set(dates)].sort().reverse();
