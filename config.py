@@ -22,24 +22,46 @@ LATEST_FILINGS_JSON_URL = f"{SEC_BASE_URL}/cgi-bin/browse-edgar?action=getcurren
 
 # Form types that typically indicate potential dilution events
 # S-1: Initial registration of securities
+# S-1/A: Amendment to S-1 (often contains pricing/offering updates)
 # S-3: Simplified registration for well-known seasoned issuers
+# S-3/A: Amendment to S-3 (updates to shelf registration)
 # F-1: Foreign private issuer initial registration (equivalent to S-1)
+# F-1/A: Amendment to F-1
 # F-3: Foreign private issuer shelf registration (equivalent to S-3)
+# F-3/A: Amendment to F-3
+# 424B1: Prospectus supplement (Rule 424(b)(1))
+# 424B2: Prospectus supplement (Rule 424(b)(2))
 # 424B3: Prospectus supplement (Rule 424(b)(3))
 # 424B4: Prospectus supplement (Rule 424(b)(4))
 # 424B5: Prospectus supplement (Rule 424(b)(5), often for shelf offerings)
 # 8-K: Current report (may disclose financing arrangements)
+# 6-K: Foreign issuer current report (equivalent to 8-K for foreign companies)
+# POS AM: Post-effective amendment to registration statement
 # EFFECT: Notice of effectiveness - indicates a registration statement (S-1/S-3/F-1/F-3) has become effective
 #         and the company can now sell the registered securities
 RELEVANT_FORM_TYPES = [
+    # Amendments first (more specific) - must be checked before base forms
+    "S-1/A",
+    "S-3/A",
+    "F-1/A",
+    "F-3/A",
+    # Base registration statements
     "S-1",
     "S-3",
     "F-1",
     "F-3",
+    # Prospectus supplements (all variants)
+    "424B1",
+    "424B2",
     "424B3",
     "424B4",
     "424B5",
+    # Current reports
     "8-K",
+    "6-K",
+    # Post-effective amendments
+    "POS AM",
+    # Effectiveness notices
     "EFFECT",
 ]
 

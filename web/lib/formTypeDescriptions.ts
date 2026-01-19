@@ -20,11 +20,19 @@ export const FORM_TYPE_DESCRIPTIONS: Record<string, string> = {
   
   "F-3/A": "Amendment to F-3 shelf registration. Updates information in a previously filed F-3.",
   
+  "424B1": "Prospectus supplement filed under Rule 424(b)(1). Provides specific pricing and offering details. Indicates active capital raising.",
+  
+  "424B2": "Prospectus supplement filed under Rule 424(b)(2). Provides specific pricing and offering details. Indicates active capital raising.",
+  
   "424B3": "Prospectus supplement filed under Rule 424(b)(3). Provides specific pricing and offering details for a shelf registration or other offering. Similar to 424B4 and 424B5, indicates active capital raising.",
   
   "424B4": "Prospectus supplement filed under Rule 424(b)(4). Provides specific pricing and offering details for a shelf registration or other offering. Often contains the actual dilution amounts.",
   
   "424B5": "Prospectus supplement filed under Rule 424(b)(5). Similar to 424B4, provides pricing and offering details. May indicate active capital raising.",
+  
+  "6-K": "Current report for foreign private issuers (equivalent to 8-K for domestic companies). May disclose financing arrangements, material events, or other information that could affect share price.",
+  
+  "POS AM": "Post-effective amendment to a registration statement. Updates or revises information in a previously effective registration statement (S-1, S-3, F-1, F-3). May contain pricing or offering updates.",
   
   "8-K": "Current report filed to announce significant corporate events. May include material changes, acquisitions, executive changes, or other events that could affect share price.",
   
