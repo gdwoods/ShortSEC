@@ -32,8 +32,8 @@ export default function CompanyActivitiesPage() {
     totalPages: 0,
   });
   const [tickerFilter, setTickerFilter] = useState("");
-  const [sortBy, setSortBy] = useState("created_at");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [sortBy, setSortBy] = useState("ticker");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const fetchActivities = async () => {
     setLoading(true);
@@ -87,13 +87,28 @@ export default function CompanyActivitiesPage() {
   };
 
   // Get all unique column names from activities
+  // Exclude: email_id, message_id, id, created_at, Source
+  // Put ticker first
   const getColumns = (): string[] => {
     if (activities.length === 0) return [];
+    const excludedColumns = new Set(['email_id', 'message_id', 'id', 'created_at', 'Source']);
     const allKeys = new Set<string>();
     activities.forEach((activity) => {
-      Object.keys(activity).forEach((key) => allKeys.add(key));
+      Object.keys(activity).forEach((key) => {
+        if (!excludedColumns.has(key)) {
+          allKeys.add(key);
+        }
+      });
     });
-    return Array.from(allKeys).sort();
+    
+    // Put ticker first, then sort the rest
+    const columns = Array.from(allKeys);
+    const tickerIndex = columns.indexOf('ticker');
+    if (tickerIndex > -1) {
+      columns.splice(tickerIndex, 1);
+      return ['ticker', ...columns.sort()];
+    }
+    return columns.sort();
   };
 
   const columns = getColumns();
