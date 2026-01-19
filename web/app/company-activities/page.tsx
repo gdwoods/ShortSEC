@@ -86,6 +86,63 @@ export default function CompanyActivitiesPage() {
     }
   };
 
+  // Format date/datetime values
+  const formatDateValue = (value: any, colName: string): string => {
+    if (!value || value === "-") return "-";
+    
+    try {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return String(value);
+      
+      // Check if it's a datetime (has time component) or just a date
+      const isDatetime = String(value).includes('T') || String(value).includes(' ');
+      
+      if (isDatetime) {
+        // Format as date with time
+        return date.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      } else {
+        // Format as date only
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+      }
+    } catch {
+      return String(value);
+    }
+  };
+
+  // Check if a column is a date/datetime column
+  const isDateColumn = (colName: string, value: any): boolean => {
+    const dateKeywords = ['date', 'time', 'created', 'updated', 'notification', 'timestamp'];
+    const lowerCol = colName.toLowerCase();
+    
+    // Check column name
+    if (dateKeywords.some(keyword => lowerCol.includes(keyword))) {
+      return true;
+    }
+    
+    // Check value format if it looks like a date string
+    if (value && typeof value === 'string') {
+      // ISO datetime format
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) return true;
+      // Date format
+      if (/^\d{4}-\d{2}-\d{2}/.test(value)) return true;
+      // Common date formats
+      if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(value)) return true;
+    }
+    
+    return false;
+  };
+
   // Get all unique column names from activities
   // Exclude: email_id, message_id, id, created_at, Source
   // Put ticker first
@@ -239,18 +296,46 @@ export default function CompanyActivitiesPage() {
                   ) : (
                     activities.map((activity) => (
                       <tr key={activity.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        {columns.map((col) => (
-                          <td
-                            key={col}
-                            className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white"
-                          >
-                            {activity[col] !== null && activity[col] !== undefined
-                              ? typeof activity[col] === "object"
-                                ? JSON.stringify(activity[col])
-                                : String(activity[col])
-                              : "-"}
-                          </td>
-                        ))}
+                        {columns.map((col) => {
+                          const rawValue = activity[col];
+                          
+                          // Check if this is a date column and format it
+                          const isDate = isDateColumn(col, rawValue);
+                          const cellValue = isDate 
+                            ? formatDateValue(rawValue, col)
+                            : rawValue !== null && rawValue !== undefined
+                              ? typeof rawValue === "object"
+                                ? JSON.stringify(rawValue)
+                                : String(rawValue)
+                              : "-";
+                          
+                          // Special handling for text columns that might be long (like description)
+                          const isTextColumn = !isDate && (
+                            col === 'description' || col === 'email_subject' || 
+                            col.toLowerCase().includes('description') || 
+                            col.toLowerCase().includes('subject') ||
+                            col.toLowerCase().includes('message')
+                          );
+                          
+                          return (
+                            <td
+                              key={col}
+                              className={`border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white ${
+                                isTextColumn ? 'max-w-md' : isDate ? 'whitespace-nowrap' : ''
+                              }`}
+                              title={isTextColumn && cellValue !== '-' ? String(rawValue) : 
+                                     isDate && rawValue ? String(rawValue) : undefined}
+                            >
+                              {isTextColumn ? (
+                                <div className="line-clamp-2 break-words">
+                                  {cellValue}
+                                </div>
+                              ) : (
+                                cellValue
+                              )}
+                            </td>
+                          );
+                        })}
                       </tr>
                     ))
                   )}
