@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 
 interface CompanyStats {
   ticker: string;
+  company_name: string | null;
   totalFilings: number;
   avgRiskScore: number;
   maxRiskScore: number;
@@ -49,6 +50,23 @@ export async function GET(
         { error: 'No filings found for this ticker' },
         { status: 404 }
       );
+    }
+
+    // Fetch company name from company_universe table
+    let companyName: string | null = null;
+    try {
+      const { data: companyData, error: companyError } = await supabase
+        .from('company_universe')
+        .select('title')
+        .eq('ticker', tickerUpper)
+        .limit(1);
+      
+      if (!companyError && companyData && companyData.length > 0) {
+        companyName = companyData[0].title || null;
+      }
+    } catch (err) {
+      console.error('Error fetching company name:', err);
+      // Continue without company name if fetch fails
     }
 
     // Calculate statistics
@@ -99,6 +117,7 @@ export async function GET(
 
     const stats: CompanyStats = {
       ticker: tickerUpper,
+      company_name: companyName,
       totalFilings,
       avgRiskScore: Math.round(avgRiskScore * 10) / 10, // Round to 1 decimal
       maxRiskScore,

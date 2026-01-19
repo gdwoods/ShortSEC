@@ -164,16 +164,16 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-xs table-fixed">
         <colgroup>
-          <col className="w-[100px]" />
-          <col className="w-[70px]" />
-          <col className="w-[50px]" />
           <col className="w-[80px]" />
+          <col className="w-[85px]" />
           <col className="w-[45px]" />
-          <col className="w-[90px]" />
           <col className="w-[70px]" />
-          <col className="w-[80px]" />
-          <col className="w-[100px]" />
           <col className="w-[40px]" />
+          <col className="w-[85px]" />
+          <col className="w-[65px]" />
+          <col className="w-[70px]" />
+          <col className="w-[120px]" />
+          <col className="w-[35px]" />
         </colgroup>
         <thead>
           <tr className="border-b border-gray-200 dark:border-gray-700">
@@ -325,23 +325,23 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
               <td className="px-1 py-0.5">
                 <div className="flex flex-wrap gap-0.5">
                   {alert.toxic_debt_detected && (
-                    <span className="text-[10px] px-0.5 py-0 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded font-medium">
-                      Toxic
+                    <span className="text-[10px] px-1 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded font-medium">
+                      Toxic Debt
                     </span>
                   )}
                   {alert.management_turnover && (
-                    <span className="text-[10px] px-0.5 py-0 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded font-medium">
-                      Resign
+                    <span className="text-[10px] px-1 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded font-medium">
+                      Resignation
                     </span>
                   )}
                   {alert.warrants_found && (
-                    <span className="text-[10px] px-0.5 py-0 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded font-medium">
-                      Warr
+                    <span className="text-[10px] px-1 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded font-medium">
+                      Warrants
                     </span>
                   )}
                   {hasValidUnderwriter(alert.underwriter_found) && (
-                    <span className="text-[10px] px-0.5 py-0 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded font-medium">
-                      UW
+                    <span className="text-[10px] px-1 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded font-medium">
+                      Underwriter
                     </span>
                   )}
                 </div>

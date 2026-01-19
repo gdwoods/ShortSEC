@@ -10,6 +10,7 @@ import AlertDetailModal from "@/components/AlertDetailModal";
 
 interface CompanyStats {
   ticker: string;
+  company_name: string | null;
   totalFilings: number;
   avgRiskScore: number;
   maxRiskScore: number;
@@ -165,9 +166,15 @@ export default function CompanyProfilePage() {
 
         {/* Company Header */}
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            {stats.ticker} - Company Profile
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+            {stats.ticker}
           </h1>
+          {stats.company_name && (
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
+              {stats.company_name}
+            </p>
+          )}
+          {!stats.company_name && <div className="mb-4" />}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <div className="text-sm text-gray-600 dark:text-gray-400">Total Filings</div>
