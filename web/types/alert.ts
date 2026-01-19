@@ -45,4 +45,5 @@ export interface AlertFilters {
   daysBack?: number;
   limit?: number;
   watchlistOnly?: boolean;
+  country?: string;
 }

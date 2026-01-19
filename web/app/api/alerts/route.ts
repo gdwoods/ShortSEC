@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const formType = searchParams.get('formType');
     const minRiskScore = searchParams.get('minRiskScore');
     const daysBack = searchParams.get('daysBack');
+    const country = searchParams.get('country');
     const limit = parseInt(searchParams.get('limit') || '500'); // Increased default to show more filings
 
     // Build query - order by filing_datetime if available, otherwise date
@@ -89,21 +90,30 @@ export async function GET(request: NextRequest) {
     }
 
     // Add company names and countries to alerts
-    const alertsWithCompanyInfo = (data || []).map((item: any) => {
+    let alertsWithCompanyInfo = (data || []).map((item: any) => {
       const tickerUpper = item.ticker?.toUpperCase();
-      const country = companyCountriesMap[tickerUpper] || null;
+      const alertCountry = companyCountriesMap[tickerUpper] || null;
       
       // Debug: Log IBG specifically
       if (tickerUpper === 'IBG') {
-        console.log(`[API] IBG alert - country from map: "${country}", ticker: "${tickerUpper}"`);
+        console.log(`[API] IBG alert - country from map: "${alertCountry}", ticker: "${tickerUpper}"`);
       }
       
       return {
         ...item,
         company_name: companyNamesMap[tickerUpper] || null,
-        country: country,
+        country: alertCountry,
       };
     });
+
+    // Filter by country if specified
+    if (country) {
+      alertsWithCompanyInfo = alertsWithCompanyInfo.filter((item: any) => {
+        const alertCountry = item.country || '';
+        // Case-insensitive partial match
+        return alertCountry.toLowerCase().includes(country.toLowerCase());
+      });
+    }
 
     // Sort by date first (primary), then by filing_datetime if available (secondary)
     // This ensures filings with same date are ordered by time, but don't penalize filings without datetime

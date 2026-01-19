@@ -219,17 +219,25 @@ export default function Home() {
       shouldShow = false;
     }
     
-    if (filters.formType && newAlert.form_type !== filters.formType) {
-      shouldShow = false;
-    }
-    
-    if (filters.minRiskScore !== undefined && newAlert.risk_score < filters.minRiskScore) {
-      shouldShow = false;
-    }
-    
-    if (filters.watchlistOnly && !watchlistTickers.has(newAlert.ticker.toUpperCase())) {
-      shouldShow = false;
-    }
+      if (filters.formType && newAlert.form_type !== filters.formType) {
+        shouldShow = false;
+      }
+      
+      if (filters.minRiskScore !== undefined && newAlert.risk_score < filters.minRiskScore) {
+        shouldShow = false;
+      }
+      
+      if (filters.country && newAlert.country) {
+        const alertCountry = newAlert.country.toLowerCase();
+        const filterCountry = filters.country.toLowerCase();
+        if (!alertCountry.includes(filterCountry)) {
+          shouldShow = false;
+        }
+      }
+      
+      if (filters.watchlistOnly && !watchlistTickers.has(newAlert.ticker.toUpperCase())) {
+        shouldShow = false;
+      }
 
     // Add to alerts list (prepend to show newest first)
     setAlerts(prev => {
@@ -321,6 +329,7 @@ export default function Home() {
       if (filters.minRiskScore !== undefined) {
         params.append("minRiskScore", filters.minRiskScore.toString());
       }
+      if (filters.country) params.append("country", filters.country);
       if (filters.daysBack) params.append("daysBack", filters.daysBack.toString());
       if (filters.limit) params.append("limit", filters.limit.toString());
 

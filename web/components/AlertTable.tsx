@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { DilutionAlert } from "@/types/alert";
-import { ExternalLink, Star } from "lucide-react";
+import { ExternalLink, Star, ChevronUp, ChevronDown } from "lucide-react";
 import { hasValidUnderwriter } from "@/lib/alertUtils";
 import FormTypeTooltip from "@/components/FormTypeTooltip";
 import { isTickerWatched, toggleWatchlist } from "@/lib/watchlist";
@@ -14,8 +14,13 @@ interface AlertTableProps {
   onWatchlistChange?: () => void;
 }
 
+type SortColumn = 'ticker' | null;
+type SortDirection = 'asc' | 'desc' | null;
+
 export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: AlertTableProps) {
   const [watchedTickers, setWatchedTickers] = useState<Set<string>>(new Set());
+  const [sortColumn, setSortColumn] = useState<SortColumn>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
   // Load watchlist state for all unique tickers in alerts
   useEffect(() => {
@@ -161,6 +166,49 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
     }
   };
 
+  // Handle sort click
+  const handleSortClick = (column: SortColumn) => {
+    if (sortColumn === column) {
+      // Toggle direction: null -> asc -> desc -> null
+      if (sortDirection === null) {
+        setSortDirection('asc');
+      } else if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else {
+        // desc -> reset to no sort
+        setSortColumn(null);
+        setSortDirection(null);
+      }
+    } else {
+      // New column, start with ascending
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  // Sort alerts based on sort state
+  const sortedAlerts = useMemo(() => {
+    if (!sortColumn || !sortDirection) {
+      return alerts; // No sort, return original order
+    }
+
+    const sorted = [...alerts];
+    
+    if (sortColumn === 'ticker') {
+      sorted.sort((a, b) => {
+        const aTicker = a.ticker.toUpperCase();
+        const bTicker = b.ticker.toUpperCase();
+        if (sortDirection === 'asc') {
+          return aTicker.localeCompare(bTicker);
+        } else {
+          return bTicker.localeCompare(aTicker);
+        }
+      });
+    }
+
+    return sorted;
+  }, [alerts, sortColumn, sortDirection]);
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-xs table-fixed">
@@ -181,7 +229,22 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
         <thead>
           <tr className="border-b border-gray-200 dark:border-gray-700">
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Date</th>
-            <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Ticker</th>
+            <th 
+              className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors select-none"
+              onClick={() => handleSortClick('ticker')}
+              title="Click to sort by ticker"
+            >
+              <div className="flex items-center gap-1">
+                Ticker
+                {sortColumn === 'ticker' && (
+                  sortDirection === 'asc' ? (
+                    <ChevronUp className="w-3 h-3" />
+                  ) : (
+                    <ChevronDown className="w-3 h-3" />
+                  )
+                )}
+              </div>
+            </th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Country</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Form</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Type</th>
@@ -195,7 +258,7 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
           </tr>
         </thead>
         <tbody>
-          {alerts.map((alert) => (
+          {sortedAlerts.map((alert) => (
             <tr
               key={alert.id}
               onClick={() => onRowClick?.(alert)}
