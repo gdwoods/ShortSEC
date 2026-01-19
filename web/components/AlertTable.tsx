@@ -168,9 +168,13 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
             <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Date</th>
             <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Ticker</th>
             <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Form</th>
+            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Type</th>
             <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Risk Score</th>
             <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Price</th>
             <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Offering</th>
+            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Bank</th>
+            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Investors</th>
+            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Shares</th>
             <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Flags</th>
             <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Details</th>
           </tr>
@@ -241,6 +245,9 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
                   </span>
                 </FormTypeTooltip>
               </td>
+              <td className="p-3 text-sm text-gray-700 dark:text-gray-300">
+                {alert.offering_type || "-"}
+              </td>
               <td className="p-3">
                 <span className={`font-semibold ${getRiskColor(alert.risk_score)}`}>
                   {alert.risk_score}
@@ -286,6 +293,23 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
               </td>
               <td className="p-3 text-sm text-gray-700 dark:text-gray-300">
                 {formatCurrency(alert.base_offering_amount || alert.offering_amount)}
+              </td>
+              <td className="p-3 text-sm text-gray-700 dark:text-gray-300">
+                {alert.bank || "-"}
+              </td>
+              <td className="p-3 text-sm text-gray-700 dark:text-gray-300">
+                <div className="max-w-xs truncate" title={alert.investors || undefined}>
+                  {alert.investors || "-"}
+                </div>
+              </td>
+              <td className="p-3 text-sm text-gray-700 dark:text-gray-300">
+                {alert.share_equivalent ? (
+                  <span className="font-mono">
+                    {parseInt(alert.share_equivalent.replace(/,/g, "")).toLocaleString()}
+                  </span>
+                ) : (
+                  "-"
+                )}
               </td>
               <td className="p-3">
                 <div className="flex flex-wrap gap-1">

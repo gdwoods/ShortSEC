@@ -28,6 +28,10 @@ export interface DilutionAlert {
   additional_dilutions: string | null;
   price_at_filing: number | null;
   price_7days_later: number | null;
+  offering_type: string | null;
+  bank: string | null;
+  investors: string | null;
+  share_equivalent: string | null;
   created_at: string;
   updated_at: string;
 }
