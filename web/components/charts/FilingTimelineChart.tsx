@@ -70,7 +70,7 @@ export default function FilingTimelineChart({ ticker, daysBack, limit = 10 }: Fi
     if (formType.includes('S-1')) return '#3b82f6'; // blue
     if (formType.includes('S-3')) return '#8b5cf6'; // purple
     if (formType.includes('EFFECT')) return '#22c55e'; // green
-    if (formType.includes('424B4') || formType.includes('424B5')) return '#ef4444'; // red
+    if (formType.includes('424B3') || formType.includes('424B4') || formType.includes('424B5')) return '#ef4444'; // red
     return '#6b7280'; // gray
   };
 
@@ -209,7 +209,7 @@ export default function FilingTimelineChart({ ticker, daysBack, limit = 10 }: Fi
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded bg-red-500"></div>
-            <span className="text-gray-600 dark:text-gray-400">424B4/424B5</span>
+            <span className="text-gray-600 dark:text-gray-400">424B3/424B4/424B5</span>
           </div>
         </div>
       </div>
