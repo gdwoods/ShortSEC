@@ -144,11 +144,11 @@ export default function CompanyActivitiesPage() {
   };
 
   // Get all unique column names from activities
-  // Exclude: email_id, message_id, id, created_at, Source
+  // Exclude: email_id, message_id, id, created_at, Source, source
   // Put ticker first
   const getColumns = (): string[] => {
     if (activities.length === 0) return [];
-    const excludedColumns = new Set(['email_id', 'message_id', 'id', 'created_at', 'Source']);
+    const excludedColumns = new Set(['email_id', 'message_id', 'id', 'created_at', 'Source', 'source']);
     const allKeys = new Set<string>();
     activities.forEach((activity) => {
       Object.keys(activity).forEach((key) => {
