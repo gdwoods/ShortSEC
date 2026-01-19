@@ -184,6 +184,10 @@ export default function AlertDetailModal({ alert, isOpen, onClose }: AlertDetail
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
+                <p className="text-sm text-gray-400 mb-1">Offering Type</p>
+                <p className="text-white font-semibold">{formatValue(alert.offering_type)}</p>
+              </div>
+              <div>
                 <p className="text-sm text-gray-400 mb-1">Base Offering Amount</p>
                 <p className="text-white font-semibold">
                   {formatCurrencyValue(alert.base_offering_amount || alert.offering_amount)}
@@ -197,6 +201,20 @@ export default function AlertDetailModal({ alert, isOpen, onClose }: AlertDetail
                 <p className="text-sm text-gray-400 mb-1">Number of Shares</p>
                 <p className="text-white font-semibold">{formatValue(alert.number_of_shares)}</p>
               </div>
+              {alert.share_equivalent && (
+                <div>
+                  <p className="text-sm text-gray-400 mb-1">Share Equivalent</p>
+                  <p className="text-white font-semibold">
+                    {parseInt(alert.share_equivalent.replace(/,/g, "")).toLocaleString()}
+                  </p>
+                </div>
+              )}
+              {alert.bank && (
+                <div>
+                  <p className="text-sm text-gray-400 mb-1">Bank</p>
+                  <p className="text-white font-semibold">{formatValue(alert.bank)}</p>
+                </div>
+              )}
               {alert.cap_raise_amount && (
                 <div>
                   <p className="text-sm text-gray-400 mb-1">Cap Raise Amount</p>
@@ -206,6 +224,12 @@ export default function AlertDetailModal({ alert, isOpen, onClose }: AlertDetail
                 </div>
               )}
             </div>
+            {alert.investors && (
+              <div className="mt-4 pt-4 border-t border-gray-700">
+                <p className="text-sm text-gray-400 mb-1">Investors</p>
+                <p className="text-white">{formatValue(alert.investors)}</p>
+              </div>
+            )}
           </div>
 
           {/* Overallotment & Additional Dilutions */}

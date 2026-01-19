@@ -762,6 +762,260 @@ def extract_private_placement_info(text: str) -> Optional[Dict]:
     return None
 
 
+def extract_investors(text: str) -> Optional[str]:
+    """
+    Extracts investor names from filing text.
+    
+    Looks for patterns in sections like:
+    - "Selling Stockholders"
+    - "Investors"
+    - "Purchasers"
+    - "Principal Stockholders"
+    - Private placement investor lists
+    
+    Args:
+        text: Filing text content
+        
+    Returns:
+        Comma-separated list of investor names, or None if not found
+    """
+    if not text:
+        return None
+    
+    text_lower = text.lower()
+    investors = []
+    
+    # Look for "Selling Stockholders" section
+    selling_stockholders = re.search(
+        r'(?:selling\s+stockholders?|principal\s+stockholders?)[:\s]+(.*?)(?:\n\n\w+\s+\d+|risk\s+factors|use\s+of\s+proceeds|$)', 
+        text, 
+        re.IGNORECASE | re.DOTALL
+    )
+    
+    if selling_stockholders:
+        section_text = selling_stockholders.group(1)
+        # Extract names (capitalized words, often followed by entities like LLC, Inc, etc.)
+        # Look for patterns like "John Smith", "ABC Fund LLC", "XYZ Capital Partners"
+        names = re.findall(
+            r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:LLC|Inc|Corp|Group|Partners|Capital|Fund|Investments|Ventures|Advisors|Management|Holdings|Trust|LP|L\.P\.)',
+            section_text
+        )
+        investors.extend(names)
+    
+    # Look for "Investors" or "Purchasers" section
+    investors_section = re.search(
+        r'(?:investors?|purchasers?)[:\s]+(.*?)(?:\n\n\w+\s+\d+|risk\s+factors|use\s+of\s+proceeds|$)', 
+        text, 
+        re.IGNORECASE | re.DOTALL
+    )
+    
+    if investors_section:
+        section_text = investors_section.group(1)
+        # Extract entity names
+        names = re.findall(
+            r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:LLC|Inc|Corp|Group|Partners|Capital|Fund|Investments|Ventures|Advisors|Management|Holdings|Trust|LP|L\.P\.)',
+            section_text
+        )
+        investors.extend(names)
+    
+    # Look for private placement investor mentions
+    # Pattern: "purchased by [Investor Name]" or "investors include [names]"
+    private_placement_investors = re.findall(
+        r'(?:purchased\s+by|investors?\s+include|investors?\s+are)[:\s]+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+(?:LLC|Inc|Corp|Group|Partners|Capital|Fund|Investments|Ventures|Advisors|Management|Holdings|Trust|LP|L\.P\.))',
+        text,
+        re.IGNORECASE
+    )
+    investors.extend(private_placement_investors)
+    
+    # Remove duplicates and clean up
+    unique_investors = list(set([inv.strip() for inv in investors if inv.strip()]))
+    
+    if unique_investors:
+        return ", ".join(unique_investors[:10])  # Limit to first 10 investors
+    
+    return None
+
+
+def calculate_share_equivalent(number_of_shares: Optional[str], overallotment_shares: Optional[str], 
+                                private_placement_shares: Optional[str], warrants_per_share: Optional[str]) -> Optional[str]:
+    """
+    Calculates total share equivalent from component share counts.
+    
+    Share equivalent = base shares + overallotment + private placement + warrant shares
+    
+    Args:
+        number_of_shares: Base offering shares
+        overallotment_shares: Overallotment option shares
+        private_placement_shares: Private placement shares
+        warrants_per_share: Warrants per share (to calculate warrant shares)
+        
+    Returns:
+        Total share equivalent as string, or None if cannot be calculated
+    """
+    def parse_shares(share_str: Optional[str]) -> Optional[int]:
+        """Parse share string to integer."""
+        if not share_str:
+            return None
+        try:
+            # Remove commas and extract number
+            cleaned = share_str.replace(',', '').replace(' ', '').lower()
+            # Remove "shares" suffix if present
+            cleaned = re.sub(r'\s*shares?', '', cleaned)
+            # Extract number
+            match = re.search(r'(\d+)', cleaned)
+            if match:
+                return int(match.group(1))
+        except (ValueError, AttributeError):
+            pass
+        return None
+    
+    def parse_warrants(warrant_str: Optional[str], base_shares: Optional[int]) -> Optional[int]:
+        """Calculate warrant shares from warrants_per_share."""
+        if not warrant_str or not base_shares:
+            return None
+        try:
+            # Extract number from "X per share" or "X"
+            match = re.search(r'(\d+(?:\.\d+)?)', str(warrant_str))
+            if match:
+                warrant_ratio = float(match.group(1))
+                return int(base_shares * warrant_ratio)
+        except (ValueError, AttributeError):
+            pass
+        return None
+    
+    base = parse_shares(number_of_shares)
+    overallotment = parse_shares(overallotment_shares)
+    private = parse_shares(private_placement_shares)
+    warrant_shares = parse_warrants(warrants_per_share, base)
+    
+    total = 0
+    if base:
+        total += base
+    if overallotment:
+        total += overallotment
+    if private:
+        total += private
+    if warrant_shares:
+        total += warrant_shares
+    
+    if total > 0:
+        return f"{total:,}"
+    
+    return None
+
+
+def extract_share_equivalent_from_text(text: str) -> Optional[str]:
+    """
+    Extracts share equivalent directly from filing text if explicitly stated.
+    
+    Looks for patterns like:
+    - "share equivalent: X"
+    - "total share equivalent: X"
+    - "equivalent shares: X"
+    
+    Args:
+        text: Filing text content
+        
+    Returns:
+        Share equivalent as string, or None if not found
+    """
+    if not text:
+        return None
+    
+    patterns = [
+        r'(?:share\s+equivalent|equivalent\s+shares?|total\s+share\s+equivalent)[:\s]+([\d,]+(?:,\d{3})*)',
+        r'([\d,]+(?:,\d{3})*)\s+share\s+equivalent',
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            return match.group(1).replace(',', '')
+    
+    return None
+
+
+def extract_offering_type(text: str, form_type: str) -> Optional[str]:
+    """
+    Extracts the offering type from filing text.
+    
+    Looks for patterns like:
+    - "private placement" -> "Private Placement"
+    - "underwritten" + underwriter -> "Underwritten"
+    - "registered direct offering" or "RDO" -> "RDO"
+    - "at-the-market" or "ATM" -> "Used ATM/Equity Line"
+    - "convertible note" or "convertible debenture" -> "Convertible Note"
+    - "initial public offering" or "IPO" -> "IPO"
+    - "best efforts" -> "Best Efforts"
+    - "rights offering" -> "Rights Offering"
+    - "warrant exercise" -> "Warrant Exercise"
+    
+    Args:
+        text: Filing text content
+        form_type: SEC form type (e.g., "S-1", "F-1", "S-3")
+        
+    Returns:
+        Offering type string, or None if not determinable
+    """
+    if not text:
+        return None
+    
+    text_lower = text.lower()
+    form_type_upper = form_type.upper()
+    
+    # Check for IPO (usually F-1 or S-1 with IPO language)
+    if form_type_upper in ["F-1", "S-1"]:
+        if re.search(r'\b(?:initial\s+public\s+offering|ipo)\b', text_lower):
+            return "IPO"
+    
+    # Check for Warrant Exercise
+    if re.search(r'\b(?:warrant\s+exercise|exercise\s+of\s+warrants)\b', text_lower):
+        return "Warrant Exercise"
+    
+    # Check for Rights Offering
+    if re.search(r'\b(?:rights\s+offering|rights\s+distribution)\b', text_lower):
+        return "Rights Offering"
+    
+    # Check for Convertible Note/Debenture
+    if re.search(r'\b(?:convertible\s+note|convertible\s+debenture|convertible\s+promissory)\b', text_lower):
+        return "Convertible Note"
+    
+    # Check for Best Efforts
+    if re.search(r'\b(?:best\s+efforts|best-efforts)\b', text_lower):
+        return "Best Efforts"
+    
+    # Check for ATM/Equity Line (at-the-market)
+    if re.search(r'\b(?:at-the-market|at\s+the\s+market|atm\s+offering|equity\s+line|sales\s+agreement)\b', text_lower):
+        return "Used ATM/Equity Line"
+    
+    # Check for RDO (Registered Direct Offering)
+    if re.search(r'\b(?:registered\s+direct\s+offering|registered\s+direct|rdo)\b', text_lower):
+        return "RDO"
+    
+    # Check for Private Placement (must be explicit, not just "private")
+    if re.search(r'\b(?:private\s+placement|private\s+offering|private\s+transaction)\b', text_lower):
+        # Check if it's also convertible preferred
+        if re.search(r'\b(?:convertible\s+preferred|preferred\s+stock)\b', text_lower):
+            return "Private Placement, Convertible Preferred"
+        # Check if it's also convertible note
+        if re.search(r'\b(?:convertible\s+note|convertible\s+debenture)\b', text_lower):
+            return "Private Placement, Convertible Note"
+        return "Private Placement"
+    
+    # Check for Underwritten (must have underwriter context)
+    if re.search(r'\b(?:underwritten|underwriter|underwriting\s+agreement)\b', text_lower):
+        # Verify it's actually an underwritten offering, not just mentioning underwriters
+        if re.search(r'\b(?:underwritten\s+by|underwritten\s+offering|underwriting\s+agreement)\b', text_lower):
+            return "Underwritten"
+    
+    # Check for Debt offerings
+    if re.search(r'\b(?:debt\s+offering|note\s+offering|debenture\s+offering)\b', text_lower):
+        return "Debt"
+    
+    # Default: return None if type cannot be determined
+    return None
+
+
 def extract_dilution_info(text: str) -> Optional[str]:
     """
     Extracts dilution-related information from filing text.
@@ -1013,11 +1267,23 @@ def parse_filing_details(filing: Dict, known_underwriters: List[str] = None, max
     number_of_shares = extract_number_of_shares(filing_text)
     use_of_proceeds = extract_use_of_proceeds(filing_text)
     dilution_info = extract_dilution_info(filing_text)
+    offering_type = extract_offering_type(filing_text, form_type)
+    investors = extract_investors(filing_text)
     
     # Extract additional dilutions
     overallotment = extract_overallotment_option(filing_text)
     warrants_info = extract_warrants_info(filing_text)
     private_placement = extract_private_placement_info(filing_text)
+    
+    # Calculate or extract share equivalent
+    share_equivalent = extract_share_equivalent_from_text(filing_text)
+    if not share_equivalent:
+        share_equivalent = calculate_share_equivalent(
+            number_of_shares,
+            overallotment.get("shares") if overallotment else None,
+            private_placement.get("shares") if private_placement else None,
+            warrants_info.get("warrants_per_share")
+        )
     
     # Extract underwriters (use config if not provided) - Do this before S-1 lookup
     if known_underwriters is None:
@@ -1025,6 +1291,9 @@ def parse_filing_details(filing: Dict, known_underwriters: List[str] = None, max
         known_underwriters = UNDERWRITERS
     
     underwriters = extract_underwriters(filing_text, known_underwriters)
+    
+    # Extract bank (first/main underwriter)
+    bank = underwriters[0] if underwriters else None
     
     # If this is an S-1/A amendment and we're missing key offering details,
     # try to find and parse the original S-1 filing
@@ -1068,6 +1337,8 @@ def parse_filing_details(filing: Dict, known_underwriters: List[str] = None, max
                             use_of_proceeds = original_s1_data.get("use_of_proceeds")
                         if not dilution_info and original_s1_data.get("dilution_info"):
                             dilution_info = original_s1_data.get("dilution_info")
+                        if not offering_type and original_s1_data.get("offering_type"):
+                            offering_type = original_s1_data.get("offering_type")
                         # Merge additional dilutions
                         if not overallotment and original_s1_data.get("overallotment_shares"):
                             overallotment = {
@@ -1086,6 +1357,12 @@ def parse_filing_details(filing: Dict, known_underwriters: List[str] = None, max
                         # Merge underwriters
                         if not underwriters and original_s1_data.get("underwriters"):
                             underwriters = original_s1_data.get("underwriters")
+                        if not bank and original_s1_data.get("bank"):
+                            bank = original_s1_data.get("bank")
+                        if not investors and original_s1_data.get("investors"):
+                            investors = original_s1_data.get("investors")
+                        if not share_equivalent and original_s1_data.get("share_equivalent"):
+                            share_equivalent = original_s1_data.get("share_equivalent")
                         
                         print(f"[Filing Parser] Merged offering details from original S-1")
                 else:
@@ -1175,8 +1452,12 @@ def parse_filing_details(filing: Dict, known_underwriters: List[str] = None, max
         "share_price": share_price,
         "number_of_shares": number_of_shares,
         "underwriters": underwriters,
+        "bank": bank,  # First/main underwriter
+        "investors": investors,  # Investor names
+        "share_equivalent": share_equivalent,  # Total share equivalent
         "use_of_proceeds": use_of_proceeds,
         "dilution_info": dilution_info,
+        "offering_type": offering_type,
         "filing_text_length": len(filing_text),
         # Additional dilution fields
         "overallotment_shares": overallotment.get("shares") if overallotment else None,

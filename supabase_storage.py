@@ -213,7 +213,7 @@ def save_alerts_to_db(filings: List[Dict], client: Client, table_name: str = "se
                 "warrants_found": warrants_found,
                 "underwriter_found": underwriters,
                 "red_flags_found": red_flags,
-                "risk_score": filing.get("risk_score", 0),
+                "risk_score": int(filing.get("risk_score", 0)),  # Ensure integer type
                 # Short seller signals
                 "cap_raise_amount": signals.get("offering_amount"),
                 "toxic_debt_detected": signals.get("high_interest_debt", False),
@@ -224,6 +224,10 @@ def save_alerts_to_db(filings: List[Dict], client: Client, table_name: str = "se
                 # Parsed filing details
                 "base_offering_amount": filing.get("base_offering_amount"),
                 "offering_amount": filing.get("base_offering_amount"),  # For backward compatibility
+                "offering_type": filing.get("offering_type"),
+                "bank": filing.get("bank"),
+                "investors": filing.get("investors"),
+                "share_equivalent": filing.get("share_equivalent"),
                 "share_price": filing.get("share_price"),
                 "number_of_shares": filing.get("number_of_shares"),
                 "overallotment_shares": filing.get("overallotment_shares"),

@@ -162,21 +162,19 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
+      <table className="w-full border-collapse text-xs">
         <thead>
           <tr className="border-b border-gray-200 dark:border-gray-700">
-            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Date</th>
-            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Ticker</th>
-            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Form</th>
-            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Type</th>
-            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Risk Score</th>
-            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Price</th>
-            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Offering</th>
-            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Bank</th>
-            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Investors</th>
-            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Shares</th>
-            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Flags</th>
-            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-400">Details</th>
+            <th className="text-left p-1.5 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Date</th>
+            <th className="text-left p-1.5 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Ticker</th>
+            <th className="text-left p-1.5 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Form</th>
+            <th className="text-left p-1.5 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Type</th>
+            <th className="text-left p-1.5 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Risk</th>
+            <th className="text-left p-1.5 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Stock Price</th>
+            <th className="text-left p-1.5 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Offering</th>
+            <th className="text-left p-1.5 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Shares</th>
+            <th className="text-left p-1.5 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Flags</th>
+            <th className="text-left p-1.5 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Details</th>
           </tr>
         </thead>
         <tbody>
@@ -188,84 +186,86 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
                 onRowClick ? "cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/70" : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
               }`}
             >
-              <td className="p-3 text-sm text-gray-700 dark:text-gray-300">
-                <div className="flex items-center gap-2">
-                  <div>
+              <td className="p-1.5 text-gray-700 dark:text-gray-300">
+                <div className="flex items-center gap-1">
+                  <div className="whitespace-nowrap">
                     {alert.filing_datetime ? (
                       (() => {
                         const dt = formatDateTime(alert.filing_datetime);
                         return dt ? (
                           <>
-                            <div>{dt.date}</div>
-                            <div className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                            <div className="text-xs">{dt.date}</div>
+                            <div className="text-[10px] text-gray-500 dark:text-gray-500">
                               {dt.time}
                             </div>
                           </>
                         ) : (
-                          formatDate(alert.date)
+                          <div className="text-xs">{formatDate(alert.date)}</div>
                         );
                       })()
                     ) : (
-                      formatDate(alert.date)
+                      <div className="text-xs">{formatDate(alert.date)}</div>
                     )}
                   </div>
                   {isNewToday(alert) && (
-                    <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded font-medium whitespace-nowrap">
-                      New Today
+                    <span className="text-[10px] px-1 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded font-medium whitespace-nowrap">
+                      New
                     </span>
                   )}
                 </div>
               </td>
-              <td className="p-3">
-                <div className="flex items-center gap-2">
+              <td className="p-1.5">
+                <div className="flex items-center gap-1">
                   <a
                     href={`/company/${alert.ticker}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
+                    className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:underline whitespace-nowrap"
                   >
                     {alert.ticker}
                   </a>
                   <button
                     onClick={(e) => handleWatchlistToggle(alert.ticker, e)}
-                    className={`p-1 rounded transition-colors ${
+                    className={`p-0.5 rounded transition-colors ${
                       watchedTickers.has(alert.ticker.toUpperCase())
                         ? "text-yellow-500 dark:text-yellow-400 hover:text-yellow-600 dark:hover:text-yellow-300"
                         : "text-gray-400 dark:text-gray-500 hover:text-yellow-500 dark:hover:text-yellow-400"
                     }`}
                     title={watchedTickers.has(alert.ticker.toUpperCase()) ? "Remove from watchlist" : "Add to watchlist"}
                   >
-                    <Star className={`w-4 h-4 ${watchedTickers.has(alert.ticker.toUpperCase()) ? "fill-current" : ""}`} />
+                    <Star className={`w-3 h-3 ${watchedTickers.has(alert.ticker.toUpperCase()) ? "fill-current" : ""}`} />
                   </button>
                 </div>
               </td>
-              <td className="p-3 text-sm text-gray-700 dark:text-gray-400">
+              <td className="p-1.5 text-gray-700 dark:text-gray-400">
                 <FormTypeTooltip formType={alert.form_type}>
-                  <span className="cursor-help underline decoration-dotted decoration-gray-500 dark:decoration-gray-500 hover:text-gray-900 dark:hover:text-gray-300">
+                  <span className="cursor-help underline decoration-dotted decoration-gray-500 dark:decoration-gray-500 hover:text-gray-900 dark:hover:text-gray-300 whitespace-nowrap">
                     {alert.form_type}
                   </span>
                 </FormTypeTooltip>
               </td>
-              <td className="p-3 text-sm text-gray-700 dark:text-gray-300">
-                {alert.offering_type || "-"}
+              <td className="p-1.5 text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                <div className="max-w-[80px] truncate" title={alert.offering_type || undefined}>
+                  {alert.offering_type || "-"}
+                </div>
               </td>
-              <td className="p-3">
-                <span className={`font-semibold ${getRiskColor(alert.risk_score)}`}>
+              <td className="p-1.5">
+                <span className={`font-semibold ${getRiskColor(alert.risk_score)} whitespace-nowrap`}>
                   {alert.risk_score}
                 </span>
               </td>
-              <td className="p-3 text-sm text-gray-700 dark:text-gray-300">
-                <div className="space-y-1">
+              <td className="p-1.5 text-gray-700 dark:text-gray-300">
+                <div className="space-y-0.5">
                   {alert.price_at_filing ? (
-                    <div>
-                      <span className="text-xs text-gray-500 dark:text-gray-500">At Filing:</span>{" "}
+                    <div className="text-[10px]">
+                      <span className="text-gray-500 dark:text-gray-500">At:</span>{" "}
                       <span className="font-medium">${alert.price_at_filing.toFixed(2)}</span>
                     </div>
                   ) : (
-                    <div className="text-xs text-gray-400 dark:text-gray-600">-</div>
+                    <div className="text-[10px] text-gray-400 dark:text-gray-600">-</div>
                   )}
                   {alert.price_7days_later ? (
-                    <div>
-                      <span className="text-xs text-gray-500 dark:text-gray-500">+7 Days:</span>{" "}
+                    <div className="text-[10px]">
+                      <span className="text-gray-500 dark:text-gray-500">+7d:</span>{" "}
                       <span className={`font-medium ${
                         alert.price_at_filing 
                           ? (alert.price_7days_later >= alert.price_at_filing 
@@ -276,7 +276,7 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
                         ${alert.price_7days_later.toFixed(2)}
                       </span>
                       {alert.price_at_filing && (
-                        <span className={`text-xs ml-1 ${
+                        <span className={`text-[10px] ml-0.5 ${
                           alert.price_7days_later >= alert.price_at_filing
                             ? "text-green-600 dark:text-green-400"
                             : "text-red-600 dark:text-red-400"
@@ -287,55 +287,47 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
                       )}
                     </div>
                   ) : alert.price_at_filing ? (
-                    <div className="text-xs text-gray-400 dark:text-gray-600">Pending...</div>
+                    <div className="text-[10px] text-gray-400 dark:text-gray-600">Pending</div>
                   ) : null}
                 </div>
               </td>
-              <td className="p-3 text-sm text-gray-700 dark:text-gray-300">
+              <td className="p-1.5 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                 {formatCurrency(alert.base_offering_amount || alert.offering_amount)}
               </td>
-              <td className="p-3 text-sm text-gray-700 dark:text-gray-300">
-                {alert.bank || "-"}
-              </td>
-              <td className="p-3 text-sm text-gray-700 dark:text-gray-300">
-                <div className="max-w-xs truncate" title={alert.investors || undefined}>
-                  {alert.investors || "-"}
-                </div>
-              </td>
-              <td className="p-3 text-sm text-gray-700 dark:text-gray-300">
+              <td className="p-1.5 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                 {alert.share_equivalent ? (
-                  <span className="font-mono">
+                  <span className="font-mono text-[10px]">
                     {parseInt(alert.share_equivalent.replace(/,/g, "")).toLocaleString()}
                   </span>
                 ) : (
                   "-"
                 )}
               </td>
-              <td className="p-3">
-                <div className="flex flex-wrap gap-1">
+              <td className="p-1.5">
+                <div className="flex flex-wrap gap-0.5">
                   {alert.toxic_debt_detected && (
-                    <span className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded font-medium">
-                      Toxic Debt
+                    <span className="text-[10px] px-1 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded font-medium">
+                      Toxic
                     </span>
                   )}
                   {alert.management_turnover && (
-                    <span className="text-xs px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded font-medium">
-                      Resignation
+                    <span className="text-[10px] px-1 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded font-medium">
+                      Resign
                     </span>
                   )}
                   {alert.warrants_found && (
-                    <span className="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded font-medium">
-                      Warrants
+                    <span className="text-[10px] px-1 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded font-medium">
+                      Warr
                     </span>
                   )}
                   {hasValidUnderwriter(alert.underwriter_found) && (
-                    <span className="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded font-medium">
-                      Underwriter
+                    <span className="text-[10px] px-1 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded font-medium">
+                      UW
                     </span>
                   )}
                 </div>
               </td>
-              <td className="p-3">
+              <td className="p-1.5">
                 <button
                   type="button"
                   onClick={(e) => {
@@ -348,10 +340,10 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
                       console.warn('[AlertTable] onRowClick is not defined');
                     }
                   }}
-                  className="text-blue-400 hover:text-blue-300 inline-flex items-center gap-1 transition-colors cursor-pointer"
+                  className="text-blue-400 hover:text-blue-300 inline-flex items-center transition-colors cursor-pointer"
                   title="View details"
                 >
-                  <ExternalLink className="w-4 h-4" />
+                  <ExternalLink className="w-3 h-3" />
                 </button>
               </td>
             </tr>
