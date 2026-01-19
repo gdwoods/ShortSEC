@@ -135,6 +135,8 @@ export default function AlertFiltersComponent({
                     <option value="S-1">S-1</option>
                     <option value="S-1/A">S-1/A</option>
                     <option value="S-3">S-3</option>
+                    <option value="F-1">F-1</option>
+                    <option value="F-3">F-3</option>
                     <option value="424B3">424B3</option>
                     <option value="424B4">424B4</option>
                     <option value="424B5">424B5</option>

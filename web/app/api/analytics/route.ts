@@ -250,8 +250,8 @@ function calculateFilingSequences(alerts: any[], ticker?: string): FilingSequenc
   const sequences: FilingSequence[] = [];
 
   byTicker.forEach((tickerAlerts, tickerKey) => {
-    // Filter for relevant form types (S-1, S-1/A, S-3, S-3/A, EFFECT, 424B3, 424B4, 424B5)
-    const relevantForms = ['S-1', 'S-1/A', 'S-3', 'S-3/A', 'EFFECT', 'EFFECT-U', '424B3', '424B4', '424B5'];
+    // Filter for relevant form types (S-1, S-1/A, S-3, S-3/A, F-1, F-1/A, F-3, F-3/A, EFFECT, 424B3, 424B4, 424B5)
+    const relevantForms = ['S-1', 'S-1/A', 'S-3', 'S-3/A', 'F-1', 'F-1/A', 'F-3', 'F-3/A', 'EFFECT', 'EFFECT-U', '424B3', '424B4', '424B5'];
     const relevantAlerts = tickerAlerts.filter(a => 
       relevantForms.some(form => a.form_type?.includes(form))
     );

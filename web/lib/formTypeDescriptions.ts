@@ -12,6 +12,14 @@ export const FORM_TYPE_DESCRIPTIONS: Record<string, string> = {
   
   "S-3/A": "Amendment to S-3 shelf registration. Updates information in a previously filed S-3.",
   
+  "F-1": "Initial registration statement for foreign private issuers (equivalent to S-1 for domestic companies). Companies must file this before selling new shares to the public. Often indicates a capital raise.",
+  
+  "F-1/A": "Amendment to F-1 registration statement. Updates or revises information in a previously filed F-1.",
+  
+  "F-3": "Shelf registration statement for foreign private issuers (equivalent to S-3 for domestic companies). Allows foreign companies to sell securities 'off the shelf' over time. Indicates potential dilution events.",
+  
+  "F-3/A": "Amendment to F-3 shelf registration. Updates information in a previously filed F-3.",
+  
   "424B3": "Prospectus supplement filed under Rule 424(b)(3). Provides specific pricing and offering details for a shelf registration or other offering. Similar to 424B4 and 424B5, indicates active capital raising.",
   
   "424B4": "Prospectus supplement filed under Rule 424(b)(4). Provides specific pricing and offering details for a shelf registration or other offering. Often contains the actual dilution amounts.",

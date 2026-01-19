@@ -23,15 +23,19 @@ LATEST_FILINGS_JSON_URL = f"{SEC_BASE_URL}/cgi-bin/browse-edgar?action=getcurren
 # Form types that typically indicate potential dilution events
 # S-1: Initial registration of securities
 # S-3: Simplified registration for well-known seasoned issuers
+# F-1: Foreign private issuer initial registration (equivalent to S-1)
+# F-3: Foreign private issuer shelf registration (equivalent to S-3)
 # 424B3: Prospectus supplement (Rule 424(b)(3))
 # 424B4: Prospectus supplement (Rule 424(b)(4))
 # 424B5: Prospectus supplement (Rule 424(b)(5), often for shelf offerings)
 # 8-K: Current report (may disclose financing arrangements)
-# EFFECT: Notice of effectiveness - indicates a registration statement (S-1/S-3) has become effective
+# EFFECT: Notice of effectiveness - indicates a registration statement (S-1/S-3/F-1/F-3) has become effective
 #         and the company can now sell the registered securities
 RELEVANT_FORM_TYPES = [
     "S-1",
     "S-3",
+    "F-1",
+    "F-3",
     "424B3",
     "424B4",
     "424B5",

@@ -67,8 +67,8 @@ export default function FilingTimelineChart({ ticker, daysBack, limit = 10 }: Fi
   }, [ticker, daysBack, limit]);
 
   const getFormTypeColor = (formType: string): string => {
-    if (formType.includes('S-1')) return '#3b82f6'; // blue
-    if (formType.includes('S-3')) return '#8b5cf6'; // purple
+    if (formType.includes('S-1') || formType.includes('F-1')) return '#3b82f6'; // blue
+    if (formType.includes('S-3') || formType.includes('F-3')) return '#8b5cf6'; // purple
     if (formType.includes('EFFECT')) return '#22c55e'; // green
     if (formType.includes('424B3') || formType.includes('424B4') || formType.includes('424B5')) return '#ef4444'; // red
     return '#6b7280'; // gray
