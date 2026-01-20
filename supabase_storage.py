@@ -180,6 +180,9 @@ def ensure_company_in_universe(ticker: str, cik: Optional[str], client: Client) 
     new tickers get their country information populated. For performance,
     it only fetches country if the company doesn't exist yet.
     
+    OPTIMIZED: Skips SEC API calls if company already exists (even without country)
+    to avoid timeout issues in scheduled runs. Country info can be backfilled later.
+    
     Args:
         ticker: Stock ticker symbol
         cik: Company CIK (optional, will be fetched if not provided)
@@ -206,19 +209,25 @@ def ensure_company_in_universe(ticker: str, cik: Optional[str], client: Client) 
             # If company exists with country, nothing to do
             if existing.get('country'):
                 return
-            # Company exists but no country - use existing CIK if available
+            # Company exists but no country - OPTIMIZATION: Skip SEC API call to save time
+            # Country can be backfilled later via populate script
+            # Only fetch if we have CIK already and can do it quickly
             if existing.get('cik') and not cik:
                 cik = existing.get('cik')
-            # Note: Continue to fetch CIK if missing, and then fetch country
+            else:
+                # Company exists but no CIK and no country - skip to avoid timeout
+                # This can be handled by backfill script
+                return
+            # Note: Continue to fetch country if we have CIK
         
-        # Fetch CIK if needed (whether company exists or not)
-        if not cik:
+        # Only fetch CIK if company doesn't exist at all (new company)
+        if not cik and not company_exists:
             try:
                 time.sleep(0.1)
                 tickers_response = requests.get(
                     f"https://www.sec.gov/files/company_tickers.json",
                     headers=SEC_HEADERS_LOCAL,
-                    timeout=10
+                    timeout=5  # Reduced timeout
                 )
                 if tickers_response.status_code == 200:
                     tickers_data = tickers_response.json()
@@ -229,18 +238,19 @@ def ensure_company_in_universe(ticker: str, cik: Optional[str], client: Client) 
             except:
                 pass  # Silently fail to avoid blocking alert saving
         
-        # Fetch company info if we have CIK
+        # Only fetch company info if we have CIK AND company doesn't exist yet
+        # (Don't fetch for existing companies missing country to save time)
         company_name = None
         country = None
         
-        if cik:
+        if cik and not company_exists:
             try:
                 cik_numeric = str(cik).lstrip("0").zfill(10)
                 time.sleep(0.1)  # Rate limiting
                 submissions_response = requests.get(
                     f"{SEC_DATA_BASE}/submissions/CIK{cik_numeric}.json",
                     headers=SEC_HEADERS_LOCAL,
-                    timeout=10
+                    timeout=5  # Reduced timeout
                 )
                 
                 if submissions_response.status_code == 200:
@@ -258,23 +268,20 @@ def ensure_company_in_universe(ticker: str, cik: Optional[str], client: Client) 
             except:
                 pass  # Silently fail to avoid blocking alert saving
         
-        # Save to company_universe
-        record = {
-            "cik": cik,
-            "ticker": ticker_upper,
-            "title": company_name,
-            "country": country,
-        }
-        
-        # Use ticker as conflict key if CIK is missing (for companies that exist without CIK)
-        if cik:
-            client.table('company_universe').upsert([record], on_conflict='cik').execute()
-        else:
-            # If no CIK, update by ticker instead
-            if company_exists:
-                client.table('company_universe').update(record).eq('ticker', ticker_upper).execute()
-            else:
-                # Insert new record (without CIK)
+        # Save to company_universe (only if we have new data to save)
+        if cik or not company_exists:
+            record = {
+                "cik": cik,
+                "ticker": ticker_upper,
+                "title": company_name,
+                "country": country,
+            }
+            
+            # Use ticker as conflict key if CIK is missing (for companies that exist without CIK)
+            if cik:
+                client.table('company_universe').upsert([record], on_conflict='cik').execute()
+            elif not company_exists:
+                # Insert new record (without CIK) only if company doesn't exist
                 client.table('company_universe').insert(record).execute()
         
     except Exception as e:

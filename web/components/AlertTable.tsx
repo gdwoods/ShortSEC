@@ -250,9 +250,9 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Type</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Risk</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Stock Price</th>
-            <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Share Price</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Offering</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Shares</th>
+            <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Share Price</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Flags</th>
             <th className="text-left px-1 py-1 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Details</th>
           </tr>
@@ -391,13 +391,6 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
                 </div>
               </td>
               <td className="px-1 py-0.5 text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                {alert.share_price ? (
-                  <span className="text-[10px] font-medium">${parseFloat(alert.share_price.replace(/[$,]/g, "")).toFixed(2)}</span>
-                ) : (
-                  <span className="text-[10px] text-gray-400 dark:text-gray-600">-</span>
-                )}
-              </td>
-              <td className="px-1 py-0.5 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                 {formatCurrency(alert.base_offering_amount || alert.offering_amount)}
               </td>
               <td className="px-1 py-0.5 text-gray-700 dark:text-gray-300 whitespace-nowrap">
@@ -407,6 +400,13 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
                   </span>
                 ) : (
                   "-"
+                )}
+              </td>
+              <td className="px-1 py-0.5 text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                {alert.share_price ? (
+                  <span className="text-[10px] font-medium">${parseFloat(alert.share_price.replace(/[$,]/[g], "")).toFixed(2)}</span>
+                ) : (
+                  <span className="text-[10px] text-gray-400 dark:text-gray-600">-</span>
                 )}
               </td>
               <td className="px-1 py-0.5">

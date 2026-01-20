@@ -24,7 +24,7 @@ on:
 jobs:
   scan-filings:
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # Allow up to 30 minutes for scanning
+    timeout-minutes: 45  # Increased to allow more time for processing
     
     steps:
       - name: Checkout code
