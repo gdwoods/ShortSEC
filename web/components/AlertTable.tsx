@@ -404,7 +404,7 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
               </td>
               <td className="px-1 py-0.5 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                 {alert.share_price ? (
-                  <span className="text-[10px] font-medium">${parseFloat(alert.share_price.replace(/[$,]/[g], "")).toFixed(2)}</span>
+                  <span className="text-[10px] font-medium">${parseFloat(alert.share_price.replace(/[$,]/g, "")).toFixed(2)}</span>
                 ) : (
                   <span className="text-[10px] text-gray-400 dark:text-gray-600">-</span>
                 )}
