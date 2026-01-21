@@ -100,23 +100,12 @@ export default function AlertTable({ alerts, onRowClick, onWatchlistChange }: Al
     return new Date(dateStr).toLocaleDateString();
   };
 
-  // Format datetime, preserving the date part correctly
+  // Format datetime, correctly handling timezone offsets
   const formatDateTime = (datetimeStr: string | null | undefined) => {
     if (!datetimeStr) return null;
     try {
-      // If it's an ISO datetime string, extract the date part
-      if (datetimeStr.includes("T")) {
-        const datePart = datetimeStr.split("T")[0];
-        const timePart = datetimeStr.split("T")[1]?.split(/[+\-Z]/)[0]; // Remove timezone
-        const [year, month, day] = datePart.split("-").map(Number);
-        const [hours, minutes] = timePart ? timePart.split(":").map(Number) : [0, 0];
-        const date = new Date(year, month - 1, day, hours, minutes);
-        return {
-          date: date.toLocaleDateString(),
-          time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        };
-      }
-      // Fallback
+      // Let the Date constructor handle the full ISO string, including timezone.
+      // This will correctly interpret the UTC time and convert it to the browser's local timezone.
       const date = new Date(datetimeStr);
       return {
         date: date.toLocaleDateString(),
